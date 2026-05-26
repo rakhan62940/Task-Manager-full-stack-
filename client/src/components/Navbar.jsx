@@ -1,5 +1,5 @@
-import { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -11,26 +11,41 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  const linkClass = ({ isActive }) =>
+    `rounded-lg px-3 py-2 text-sm font-medium transition ${isActive ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-50 hover:bg-blue-500 hover:text-white'}`;
+
   return (
-    <nav className="bg-blue-600 p-4 text-white">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold">Team Task Manager</Link>
-        <div className="space-x-4">
+    <nav className="bg-blue-600 text-white shadow-lg shadow-blue-900/10">
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link to="/" className="text-xl font-bold tracking-tight">Team Task Manager</Link>
           {user ? (
-            <>
-              <span className="text-sm">Hello, {user.name} ({user.role})</span>
-              <Link to="/" className="hover:underline">Dashboard</Link>
-              <Link to="/projects" className="hover:underline">Projects</Link>
-              <Link to="/tasks" className="hover:underline">Tasks</Link>
-              <button onClick={handleLogout} className="bg-red-500 px-3 py-1 rounded hover:bg-red-600">Logout</button>
-            </>
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="rounded-full bg-blue-500 px-3 py-1 text-blue-50">
+                {user.name} ({user.role})
+              </span>
+              <button
+                onClick={handleLogout}
+                className="rounded-lg bg-white px-3 py-2 font-medium text-blue-700 transition hover:bg-blue-50"
+              >
+                Logout
+              </button>
+            </div>
           ) : (
-            <>
-              <Link to="/login" className="hover:underline">Login</Link>
-              <Link to="/signup" className="hover:underline">Signup</Link>
-            </>
+            <div className="flex gap-2">
+              <NavLink to="/login" className={linkClass}>Login</NavLink>
+              <NavLink to="/signup" className={linkClass}>Signup</NavLink>
+            </div>
           )}
         </div>
+
+        {user && (
+          <div className="flex flex-wrap gap-2">
+            <NavLink to="/" className={linkClass} end>Dashboard</NavLink>
+            <NavLink to="/projects" className={linkClass}>Projects</NavLink>
+            <NavLink to="/tasks" className={linkClass}>Tasks</NavLink>
+          </div>
+        )}
       </div>
     </nav>
   );

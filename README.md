@@ -1,103 +1,266 @@
 # Team Task Manager
 
-A full-stack web application for team task management with role-based access control (Admin/Member).
+A full-stack **Team Task Manager** built with **React, Express.js, Node.js, SQLite, and Sequelize**. Features JWT authentication, role-based access control (Admin/Member), project management, project membership, and task tracking.
 
-## Features
-
-- **Authentication**: Signup/Login with JWT
-- **Project Management**: Create, view, and delete projects (Admin only)
-- **Task Management**: Create, assign, and track tasks with status updates
-- **Dashboard**: Overview of tasks, projects, and overdue items
-- **Role-Based Access**: Admin/Member roles with appropriate permissions
+---
 
 ## Tech Stack
 
-- **Backend**: Node.js + Express + MongoDB (Mongoose)
-- **Frontend**: React + Vite + Tailwind CSS
-- **Authentication**: JWT + bcryptjs
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18 + Vite, React Router v6, Tailwind CSS |
+| Backend | Node.js, Express.js |
+| Database | SQLite + Sequelize (can use PostgreSQL/MySQL) |
+| Auth | JSON Web Tokens (JWT), bcryptjs |
+| Validation | express-validator |
+| HTTP Client | Axios |
 
-## Project Structure
+---
+
+## Folder Structure
 
 ```
 Assessment/
-├── server/           # Backend API
-│   ├── models/       # User, Project, Task models
-│   ├── routes/       # API routes (auth, projects, tasks)
-│   ├── middleware/   # Auth middleware
-│   ├── server.js     # Main server file
-│   └── package.json
-├── client/           # Frontend React app
+├── server/                    # Backend (Node.js + Express)
+│   ├── config/
+│   │   └── db.js             # Sequelize SQLite config
 │   ├── src/
-│   │   ├── pages/    # Login, Signup, Dashboard, Projects, Tasks
-│   │   ├── components/  # Navbar, PrivateRoute
-│   │   ├── context/  # AuthContext
-│   │   └── services/ # API service
-│   ├── package.json
-│   └── vite.config.js
-├── railway.json      # Railway deployment config
-├── package.json      # Root package.json
-└── SPEC.md           # Project specification
+│   │   ├── models/           # User, Project, Task, ProjectMember
+│   │   ├── modules/
+│   │   │   ├── auth/         # Signup, login, JWT
+│   │   │   ├── projects/     # Project CRUD
+│   │   │   └── tasks/        # Task CRUD
+│   │   └── middlewares/      # auth, role, error
+│   ├── server.js
+│   └── package.json
+├── client/                   # Frontend (React + Vite)
+│   ├── src/
+│   │   ├── pages/            # Login, Signup, Dashboard, Projects, Tasks
+│   │   ├── components/       # Navbar, PrivateRoute
+│   │   ├── context/          # AuthContext
+│   │   └── services/         # Axios API instance
+│   └── package.json
+├── railway.json
+├── README.md
+└── SPEC.md
 ```
 
-## Local Development
+---
+
+## Local Setup
 
 ### Prerequisites
 
-- Node.js (v18+)
-- MongoDB (local or Atlas)
+- Node.js 18+
+- npm
 
-### Setup
+### Install Everything
 
-1. Install dependencies:
-```bash
-npm install
-cd server && npm install
-cd ../client && npm install
+Run from the project root:
+
+```powershell
+npm run install:all
 ```
 
-2. Configure environment:
-```bash
-# Edit server/.env
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/team-task-manager
-JWT_SECRET=your_secret_key_here
-```
+### Start Full App
 
-3. Start development:
-```bash
-# From root directory
+Run from the project root:
+
+```powershell
 npm run dev
 ```
 
-- Backend: http://localhost:5000
-- Frontend: http://localhost:5173
+This starts:
 
-## Railway Deployment
+- Backend API: **http://localhost:5000**
+- Frontend app: **http://localhost:5173**
 
-1. Connect your GitHub repository to Railway
-2. Add environment variables:
-   - `MONGO_URI`: Your MongoDB connection string (use MongoDB Atlas or Railway's database)
-   - `JWT_SECRET`: A secure random string
-3. Deploy - Railway will auto-detect and build
+### Start Backend Only
+
+```powershell
+cd server
+npm install
+$env:JWT_SECRET="dev-secret"
+npm run dev
+```
+
+### Start Frontend Only
+
+```powershell
+cd client
+npm install
+npm run dev
+```
+
+### Environment Variables
+
+| Variable | Used By | Default | Purpose |
+|----------|---------|---------|---------|
+| `PORT` | Backend | `5000` | API server port |
+| `JWT_SECRET` | Backend | Required for production | JWT signing secret |
+| `JWT_EXPIRES_IN` | Backend | `7d` | Token lifetime |
+| `DB_STORAGE` | Backend | `database.sqlite` in the project root | SQLite file path |
+| `VITE_API_URL` | Frontend | `/api` | API base URL for deployed frontend |
+
+For local development, Vite proxies `/api` to `http://localhost:5000`, so `VITE_API_URL` is usually not needed.
+
+---
+
+## Commands
+
+### Root Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run install:all` | Install root, backend, and frontend dependencies |
+| `npm run dev` | Start backend and frontend together |
+| `npm run server` | Start backend dev server from root |
+| `npm run client` | Start frontend dev server from root |
+
+### Backend Commands
+
+Run from `server/`:
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Express with Node watch mode |
+| `npm start` | Start Express normally |
+| `node --check server.js` | Check backend entrypoint syntax |
+| `node --check src/modules/projects/projects.service.js` | Check project service syntax |
+| `node --check src/modules/tasks/tasks.service.js` | Check task service syntax |
+| `node test-api.js` | Run API verification against a running server |
+
+### Frontend Commands
+
+Run from `client/`:
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite development server |
+| `npm run build` | Build production frontend bundle |
+| `npm run preview` | Preview the production build locally |
+
+### API Test Commands
+
+Use two terminals.
+
+Terminal 1, start backend with an isolated SQLite database:
+
+```powershell
+cd server
+$env:JWT_SECRET="test-secret"
+$env:DB_STORAGE="$env:TEMP\team-task-manager-test.sqlite"
+npm start
+```
+
+Terminal 2, run the API suite:
+
+```powershell
+cd server
+$env:API_BASE_URL="http://localhost:5000"
+node test-api.js
+```
+
+Expected result:
+
+```text
+Results: 73 passed, 0 failed, 73 total
+```
+
+### Reset Local SQLite Database
+
+Run from the project root:
+
+```powershell
+Remove-Item -LiteralPath ".\database.sqlite" -Force
+```
+
+The backend recreates the database on the next start.
+
+---
+
+## API Response Format
+
+All API responses follow this structure:
+
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": { ... }
+}
+```
+
+Error responses:
+
+```json
+{
+  "success": false,
+  "message": "Error description",
+  "data": null
+}
+```
+
+---
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | /api/auth/signup | Register user | No |
-| POST | /api/auth/login | Login user | No |
-| GET | /api/projects | List projects | Yes |
-| POST | /api/projects | Create project | Yes (Admin) |
-| DELETE | /api/projects/:id | Delete project | Yes (Admin) |
-| GET | /api/tasks | List tasks | Yes |
-| POST | /api/tasks | Create task | Yes |
-| PUT | /api/tasks/:id | Update task | Yes |
-| DELETE | /api/tasks/:id | Delete task | Yes |
-| GET | /api/dashboard | Dashboard stats | Yes |
+### Auth
 
-## First User
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/api/auth/signup` | Register new user |
+| POST | `/api/auth/login` | Login and receive JWT |
 
-The first user to signup becomes **Admin**. Subsequent users become **Members**.
+### Projects
+
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET | `/api/projects` | Authenticated | List accessible projects |
+| POST | `/api/projects` | Admin | Create project |
+| GET | `/api/projects/:id` | Authenticated | Get accessible project details |
+| PUT | `/api/projects/:id` | Admin | Update project |
+| DELETE | `/api/projects/:id` | Admin | Delete project |
+| POST | `/api/projects/:id/members` | Admin | Add member |
+| DELETE | `/api/projects/:id/members/:userId` | Admin | Remove member |
+
+### Tasks
+
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET | `/api/tasks` | Authenticated | List accessible tasks |
+| POST | `/api/tasks` | Project member/Admin | Create task |
+| GET | `/api/tasks/:id` | Authenticated | Get accessible task details |
+| PUT | `/api/tasks/:id` | Creator/Assignee/Admin | Update task |
+| PATCH | `/api/tasks/:id/status` | Creator/Assignee/Admin | Update task status |
+| DELETE | `/api/tasks/:id` | Creator/Assignee/Admin | Delete task |
+
+### Dashboard
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/api/dashboard` | Get task/project counts |
+
+---
+
+## Roles
+
+| Role | Permissions |
+|------|-------------|
+| **Admin** | Create/delete projects, manage members, full task CRUD |
+| **Member** | View joined projects, create tasks in joined projects, assign project members, update/delete tasks they created or are assigned to |
+
+**Note:** First user to signup becomes Admin automatically.
+
+---
+
+## Railway Deployment
+
+1. Push to GitHub
+2. Connect repo to Railway
+3. Deploy - SQLite works out of the box for assignment/demo use (set `DB_STORAGE` if you need a custom SQLite path)
+
+---
 
 ## License
 
