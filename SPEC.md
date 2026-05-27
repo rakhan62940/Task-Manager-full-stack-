@@ -5,7 +5,7 @@
 **Name:** Team Task Manager  
 **Type:** Full-Stack Web Application  
 **Purpose:** Assignment project for team/project/task management with role-based access  
-**Tech Stack:** MERN (MongoDB, Express, React, Node.js)  
+**Tech Stack:** React, Express, Node.js, SQLite, Sequelize  
 **Deployment:** Railway
 
 ## Functionality Specification
@@ -26,7 +26,7 @@
 
 3. **Task Management**
    - Create tasks within projects
-   - Assign tasks to project members
+    - Assign tasks to project members
    - Update task status (Todo, InProgress, Done)
    - Set due dates
    - Filter tasks by status
@@ -38,8 +38,8 @@
    - Quick stats per project
 
 5. **Role-Based Access Control (RBAC)**
-   - Admin: Full CRUD on projects/tasks, member management
-   - Member: View projects, update own tasks
+    - Admin: Full CRUD on projects/tasks, member management
+    - Member: View joined projects, create tasks in joined projects, update/delete tasks they created or are assigned to
 
 ### Data Models
 
@@ -58,8 +58,8 @@
 {
   title: String,
   description: String,
-  createdBy: ObjectId (User),
-  members: [ObjectId (User)],
+  createdById: Number (User),
+  members: [Number (User)],
   createdAt: Date
 }
 ```
@@ -70,8 +70,9 @@
   title: String,
   description: String,
   status: String ('Todo' | 'InProgress' | 'Done'),
-  projectId: ObjectId (Project),
-  assignedTo: ObjectId (User),
+  projectId: Number (Project),
+  assignedToId: Number (User),
+  createdById: Number (User),
   dueDate: Date,
   createdAt: Date
 }
@@ -88,8 +89,8 @@
 | DELETE | /api/projects/:id | Delete project | Yes | Admin |
 | POST | /api/projects/:id/members | Add member | Yes | Admin |
 | GET | /api/tasks | List tasks | Yes | All |
-| POST | /api/tasks | Create task | Yes | All |
-| PUT | /api/tasks/:id | Update task | Yes | All |
+| POST | /api/tasks | Create task in joined project | Yes | Admin/Project member |
+| PUT | /api/tasks/:id | Update task | Yes | Admin/Creator/Assignee |
 | GET | /api/dashboard | Dashboard stats | Yes | All |
 
 ### Validation Rules
@@ -125,8 +126,8 @@ client/src/
 
 1. ✅ User can signup and login
 2. ✅ Admin can create projects and add members
-3. ✅ All users can create and view tasks
-4. ✅ Tasks can be assigned and status updated
+3. ✅ Project members can create and view tasks in joined projects
+4. ✅ Tasks can be assigned to project members and status updated by allowed users
 5. ✅ Dashboard shows task counts and overdue items
 6. ✅ RBAC enforced on backend and frontend
 7. ✅ Application deployed and accessible on Railway
